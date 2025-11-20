@@ -149,16 +149,6 @@ export default function Room() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Video Area */}
-        <div className="flex-1 p-4">
-          <Card className="h-full bg-[#1E293B] border-white/10 flex items-center justify-center">
-            <div className="text-center">
-              <VideoOff className="w-16 h-16 text-[#7C3AED]/50 mx-auto mb-4" />
-              <p className="text-[#E6EEF8]/70">Video conferencing coming soon</p>
-            </div>
-          </Card>
-        </div>
-
         {/* Chat Sidebar */}
         <div className="w-96 border-l border-white/10 bg-[#0F172A]/50 flex flex-col">
           {/* Chat Header */}
