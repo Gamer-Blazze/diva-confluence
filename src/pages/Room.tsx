@@ -146,38 +146,40 @@ export default function Room() {
         </div>
       </nav>
 
-      {/* Full Screen Messenger-Style Chat */}
+      {/* Modern Group Chat Interface */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex-1 bg-white flex flex-col overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8"
       >
-        {/* Chat Header - Fixed */}
-        <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] p-4 sm:p-6 flex items-center justify-between shadow-lg border-b border-white/10">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <motion.div 
-              className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-md" />
-            </motion.div>
-            <div>
-              <h3 className="text-white font-bold text-xl sm:text-2xl tracking-tight drop-shadow-sm">Chat</h3>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-sm shadow-green-400/50" />
-                <p className="text-white/95 text-xs sm:text-sm font-medium">
-                  {participants?.length || 0} online
-                </p>
+        <div className="w-full max-w-5xl h-[calc(100vh-12rem)] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+          {/* Chat Header - Fixed within chat box */}
+          <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] px-6 py-4 flex items-center justify-between shadow-md flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <motion.div 
+                className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <MessageSquare className="w-6 h-6 text-white drop-shadow-md" />
+              </motion.div>
+              <div>
+                <h3 className="text-white font-bold text-xl tracking-tight drop-shadow-sm">
+                  {room.title}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-sm shadow-green-400/50" />
+                  <p className="text-white/95 text-sm font-medium">
+                    {participants?.length || 0} online
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Messages Area - Scrollable */}
-        <>
-            <div className="flex-1 overflow-y-auto p-6 bg-[#F5F5F5] space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+          {/* Messages Area - Scrollable with fixed height */}
+          <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-[#F5F5F5] to-[#FAFAFA] space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
               <AnimatePresence>
                 {messages?.map((msg, index) => {
                   const isOwnMessage = msg.userId === user?._id;
@@ -278,33 +280,33 @@ export default function Room() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Section - Fixed at Bottom */}
-            <form onSubmit={handleSendMessage} className="p-6 bg-white border-t border-gray-200 shadow-lg">
-              <div className="flex gap-3 items-center max-w-4xl mx-auto">
-                <Input
-                  value={messageText}
-                  onChange={(e) => handleTyping(e.target.value)}
-                  placeholder="Type a message..."
-                  className="flex-1 rounded-full border-gray-300 bg-[#F5F5F5] focus:bg-white transition-colors text-base py-6"
-                  disabled={isSending}
-                />
-                <motion.div whileTap={{ scale: 0.9 }}>
-                  <Button
-                    type="submit"
-                    disabled={isSending || !messageText.trim()}
-                    size="icon"
-                    className="rounded-full bg-gradient-to-r from-[#0084FF] to-[#00A3FF] hover:opacity-90 text-white h-12 w-12 shadow-lg"
-                  >
-                    {isSending ? (
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                    ) : (
-                      <Send className="w-6 h-6" />
-                    )}
-                  </Button>
-                </motion.div>
-              </div>
-            </form>
-        </>
+          {/* Input Section - Fixed at Bottom within chat box */}
+          <form onSubmit={handleSendMessage} className="px-6 py-4 bg-white border-t border-gray-200 shadow-inner flex-shrink-0">
+            <div className="flex gap-3 items-center">
+              <Input
+                value={messageText}
+                onChange={(e) => handleTyping(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-1 rounded-full border-gray-300 bg-[#F5F5F5] focus:bg-white transition-all duration-200 text-base py-5 px-5 focus:ring-2 focus:ring-[#0084FF]/30"
+                disabled={isSending}
+              />
+              <motion.div whileTap={{ scale: 0.9 }}>
+                <Button
+                  type="submit"
+                  disabled={isSending || !messageText.trim()}
+                  size="icon"
+                  className="rounded-full bg-gradient-to-r from-[#0084FF] to-[#00A3FF] hover:opacity-90 text-white h-12 w-12 shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  {isSending ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Send className="w-5 h-5" />
+                  )}
+                </Button>
+              </motion.div>
+            </div>
+          </form>
+        </div>
       </motion.div>
     </div>
   );
