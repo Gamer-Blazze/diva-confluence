@@ -33,7 +33,7 @@ export default function Room() {
   const [hasJoined, setHasJoined] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -53,7 +53,7 @@ export default function Room() {
           console.error(error);
         });
     }
-  }, [roomId, user, hasJoined, joinRoom]);
+  }, [roomId, user, hasJoined]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -162,3 +162,30 @@ export const getRoomParticipants = query({
     return participantsWithUsers;
   },
 });
+
+export const getRoomMessages = query({
+  args: { roomId: v.id("rooms") },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
+      .order("asc")
+      .take(100);
+
+    const messagesWithUsers = await Promise.all(
+      messages.map(async (msg) => {
+        const user = await ctx.db.get(msg.userId);
+        return {
+          ...msg,
+          user: user ? {
+            name: user.name,
+            displayName: user.displayName,
+            isPremium: user.isPremium,
+          } : null,
+        };
+      })
+    );
+
+    return messagesWithUsers;
+  },
+});
