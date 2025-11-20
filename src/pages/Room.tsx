@@ -146,49 +146,6 @@ export default function Room() {
         </div>
       </nav>
 
-      {/* Main Content Area - Empty for now, chat is fixed bottom-right */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center">
-          <MessageSquare className="w-16 h-16 text-[#7C3AED]/30 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome to {room.title}</h2>
-          <p className="text-[#E6EEF8]/70 mb-4">
-            Chat with {participants?.length || 0} participants using the messenger below
-          </p>
-          
-          {/* Participants List */}
-          <div className="mt-8 max-w-2xl mx-auto">
-            <div className="flex items-center gap-2 mb-4 justify-center">
-              <Users className="w-5 h-5 text-[#7C3AED]" />
-              <span className="text-white font-semibold">Online Now</span>
-            </div>
-            <div className="flex flex-wrap gap-3 justify-center">
-              {participants?.map((p) => (
-                <motion.div
-                  key={p._id}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-2 bg-[#1E293B] border border-white/10 rounded-full px-4 py-2"
-                >
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-[#7C3AED] text-white text-xs">
-                      {p.user?.displayName?.[0] || p.user?.name?.[0] || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-[#E6EEF8] text-sm font-medium">
-                    {p.user?.displayName || p.user?.name || "Guest"}
-                  </span>
-                  {p.user?.isPremium && (
-                    <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0 text-xs px-2 py-0">
-                      VIP
-                    </Badge>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Full Screen Messenger-Style Chat */}
       <motion.div
         initial={{ opacity: 0 }}
