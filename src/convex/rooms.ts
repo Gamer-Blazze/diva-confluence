@@ -189,3 +189,105 @@ export const getRoomMessages = query({
     return messagesWithUsers;
   },
 });
+
+export const deleteRoom = mutation({
+  args: { roomId: v.id("rooms") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+
+    const room = await ctx.db.get(args.roomId);
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    // Only admin or room owner can delete
+    if (user.role !== "admin" && room.ownerId !== user._id) {
+      throw new Error("Only admins or room owners can delete rooms");
+    }
+
+    // Delete all participants
+    const participants = await ctx.db
+      .query("participants")
+      .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
+      .collect();
+    
+    for (const participant of participants) {
+      await ctx.db.delete(participant._id);
+    }
+
+    // Delete all messages
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
+      .collect();
+    
+    for (const message of messages) {
+      await ctx.db.delete(message._id);
+    }
+
+    // Delete the room
+    await ctx.db.delete(args.roomId);
+
+    return args.roomId;
+  },
+});
+
+export const toggleRoomStatus = mutation({
+  args: { roomId: v.id("rooms") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+
+    const room = await ctx.db.get(args.roomId);
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    // Only admin or room owner can toggle status
+    if (user.role !== "admin" && room.ownerId !== user._id) {
+      throw new Error("Only admins or room owners can toggle room status");
+    }
+
+    await ctx.db.patch(args.roomId, {
+      isActive: !room.isActive,
+    });
+
+    return args.roomId;
+  },
+});
+
+export const listAllRooms = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user || user.role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
+    const rooms = await ctx.db.query("rooms").collect();
+
+    const roomsWithDetails = await Promise.all(
+      rooms.map(async (room) => {
+        const owner = await ctx.db.get(room.ownerId);
+        const participants = await ctx.db
+          .query("participants")
+          .withIndex("by_room", (q) => q.eq("roomId", room._id))
+          .filter((q) => q.eq(q.field("isActive"), true))
+          .collect();
+
+        return {
+          ...room,
+          owner: owner ? { name: owner.name, displayName: owner.displayName } : null,
+          participantCount: participants.length,
+        };
+      })
+    );
+
+    return roomsWithDetails;
+  },
+});

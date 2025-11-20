@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { Plus, Video, Users, LogOut } from "lucide-react";
+import { Plus, Video, Users, LogOut, Shield, Power, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,17 +15,22 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { isLoading, isAuthenticated, user, signOut } = useAuth();
   const rooms = useQuery(api.rooms.listActiveRooms);
+  const allRooms = useQuery(user?.role === "admin" ? api.rooms.listAllRooms : ("skip" as any));
   const createRoom = useMutation(api.rooms.createRoom);
+  const deleteRoom = useMutation(api.rooms.deleteRoom);
+  const toggleRoomStatus = useMutation(api.rooms.toggleRoomStatus);
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [roomTitle, setRoomTitle] = useState("");
   const [roomType, setRoomType] = useState<"free" | "premium">("free");
   const [isCreating, setIsCreating] = useState(false);
+  const [deleteRoomId, setDeleteRoomId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -59,6 +65,27 @@ export default function Dashboard() {
     }
   };
 
+  const handleDeleteRoom = async (roomId: string) => {
+    try {
+      await deleteRoom({ roomId: roomId as Id<"rooms"> });
+      toast.success("Room deleted successfully");
+      setDeleteRoomId(null);
+    } catch (error) {
+      toast.error("Failed to delete room");
+      console.error(error);
+    }
+  };
+
+  const handleToggleRoomStatus = async (roomId: string) => {
+    try {
+      await toggleRoomStatus({ roomId: roomId as Id<"rooms"> });
+      toast.success("Room status updated");
+    } catch (error) {
+      toast.error("Failed to update room status");
+      console.error(error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex items-center justify-center">
@@ -66,6 +93,8 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  const isAdmin = user?.role === "admin";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A]">
@@ -80,6 +109,12 @@ export default function Dashboard() {
               <span className="text-xl font-bold text-white">Diva Conference</span>
             </div>
             <div className="flex items-center gap-4">
+              {isAdmin && (
+                <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0">
+                  <Shield className="w-3 h-3 mr-1" />
+                  Admin
+                </Badge>
+              )}
               <Button
                 onClick={() => navigate("/profile")}
                 variant="ghost"
@@ -172,6 +207,91 @@ export default function Dashboard() {
             </Dialog>
           </div>
 
+          {/* Admin Room Management Section */}
+          {isAdmin && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <Shield className="w-6 h-6 text-[#F59E0B]" />
+                Admin: All Rooms
+              </h2>
+              {!allRooms ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#7C3AED]" />
+                </div>
+              ) : allRooms.length === 0 ? (
+                <Card className="bg-[#1E293B] border-white/10">
+                  <CardContent className="py-12 text-center">
+                    <Users className="w-12 h-12 text-[#7C3AED]/50 mx-auto mb-4" />
+                    <p className="text-[#E6EEF8]/70">No rooms found</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {allRooms.map((room: any) => (
+                    <motion.div
+                      key={room._id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Card className="bg-[#1E293B] border-white/10 hover:border-[#7C3AED]/50 transition-all">
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <CardTitle className="text-white">{room.title}</CardTitle>
+                            <div className="flex gap-2">
+                              {room.type === "premium" && (
+                                <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0">
+                                  Premium
+                                </Badge>
+                              )}
+                              <Badge className={room.isActive ? "bg-green-500/20 text-green-400 border-green-500/50" : "bg-red-500/20 text-red-400 border-red-500/50"}>
+                                {room.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                          </div>
+                          <CardDescription className="text-[#E6EEF8]/70">
+                            by {room.owner?.displayName || room.owner?.name || "Unknown"}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center gap-2 text-[#E6EEF8]/70 mb-4">
+                            <Users className="w-4 h-4" />
+                            <span>{room.participantCount} participants</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => navigate(`/room/${room._id}`)}
+                              className="flex-1 bg-[#7C3AED] hover:bg-[#7C3AED]/90 text-white"
+                              size="sm"
+                            >
+                              Join
+                            </Button>
+                            <Button
+                              onClick={() => handleToggleRoomStatus(room._id)}
+                              variant="outline"
+                              className="border-white/10 text-[#E6EEF8] hover:bg-white/10"
+                              size="sm"
+                            >
+                              <Power className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              onClick={() => setDeleteRoomId(room._id)}
+                              variant="outline"
+                              className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                              size="sm"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Active Rooms */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Active Rooms</h2>
@@ -224,6 +344,29 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteRoomId} onOpenChange={() => setDeleteRoomId(null)}>
+        <AlertDialogContent className="bg-[#1E293B] border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Delete Room</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#E6EEF8]/70">
+              Are you sure you want to delete this room? This action cannot be undone and will remove all messages and participants.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-[#0F172A] border-white/10 text-white hover:bg-white/10">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteRoomId && handleDeleteRoom(deleteRoomId)}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
