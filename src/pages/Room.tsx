@@ -148,9 +148,9 @@ export default function Room() {
       </nav>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Chat Full Screen */}
-        <div className="w-full bg-[#0F172A]/50 flex flex-col">
+        <div className="flex-1 w-full bg-[#0F172A]/50 flex flex-col">
           {/* Chat Header */}
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center gap-2">
