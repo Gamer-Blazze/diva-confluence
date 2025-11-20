@@ -165,13 +165,6 @@ export default function Room() {
               whileTap={{ scale: 0.95 }}
               className="w-14 h-14 rounded-full bg-[#1E293B] border border-white/10 flex items-center justify-center text-white hover:bg-white/10"
             >
-              <Mic className="w-6 h-6" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-14 h-14 rounded-full bg-[#1E293B] border border-white/10 flex items-center justify-center text-white hover:bg-white/10"
-            >
               <Video className="w-6 h-6" />
             </motion.button>
           </div>
