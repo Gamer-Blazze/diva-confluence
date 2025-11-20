@@ -21,7 +21,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { isLoading, isAuthenticated, user, signOut } = useAuth();
   const rooms = useQuery(api.rooms.listActiveRooms);
-  const allRooms = useQuery(user?.role === "admin" ? api.rooms.listAllRooms : ("skip" as any));
+  const allRooms = useQuery(
+    api.rooms.listAllRooms,
+    user?.role === "admin" ? {} : "skip"
+  );
   const createRoom = useMutation(api.rooms.createRoom);
   const deleteRoom = useMutation(api.rooms.deleteRoom);
   const toggleRoomStatus = useMutation(api.rooms.toggleRoomStatus);
