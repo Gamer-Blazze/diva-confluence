@@ -117,35 +117,6 @@ export default function Room() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex flex-col">
-      {/* Header */}
-      <nav className="backdrop-blur-lg bg-[#0F172A]/80 border-b border-white/10">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={handleLeaveRoom}
-                variant="ghost"
-                className="text-[#E6EEF8] hover:bg-white/10"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Leave
-              </Button>
-              <div>
-                <h1 className="text-white font-bold">{room.title}</h1>
-                <p className="text-[#E6EEF8]/70 text-sm">
-                  {participants?.length || 0} participants
-                </p>
-              </div>
-            </div>
-            {room.type === "premium" && (
-              <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0">
-                Premium
-              </Badge>
-            )}
-          </div>
-        </div>
-      </nav>
-
       {/* Modern Group Chat Interface */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
