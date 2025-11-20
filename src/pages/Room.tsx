@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, VideoOff, Mic, MicOff, PhoneOff } from "lucide-react";
+import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { Id } from "@/convex/_generated/dataModel";
 
 export default function Room() {
@@ -29,8 +28,8 @@ export default function Room() {
   const [messageText, setMessageText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [hasJoined, setHasJoined] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -147,142 +146,222 @@ export default function Room() {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Chat Full Screen */}
-        <div className="flex-1 w-full bg-[#0F172A]/50 flex flex-col">
-          {/* Chat Header */}
-          <div className="p-4 border-b border-white/10">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-[#7C3AED]" />
-              <h2 className="text-white font-semibold">Chat</h2>
+      {/* Main Content Area - Empty for now, chat is fixed bottom-right */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center">
+          <MessageSquare className="w-16 h-16 text-[#7C3AED]/30 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Welcome to {room.title}</h2>
+          <p className="text-[#E6EEF8]/70 mb-4">
+            Chat with {participants?.length || 0} participants using the messenger below
+          </p>
+          
+          {/* Participants List */}
+          <div className="mt-8 max-w-2xl mx-auto">
+            <div className="flex items-center gap-2 mb-4 justify-center">
+              <Users className="w-5 h-5 text-[#7C3AED]" />
+              <span className="text-white font-semibold">Online Now</span>
             </div>
-          </div>
-
-          {/* Participants */}
-          <div className="p-4 border-b border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="w-4 h-4 text-[#E6EEF8]/70" />
-              <span className="text-[#E6EEF8]/70 text-sm">
-                {participants?.length || 0} online
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3 justify-center">
               {participants?.map((p) => (
-                <div key={p._id} className="flex items-center gap-1">
-                  <Avatar className="w-6 h-6">
+                <motion.div
+                  key={p._id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-2 bg-[#1E293B] border border-white/10 rounded-full px-4 py-2"
+                >
+                  <Avatar className="w-8 h-8">
                     <AvatarFallback className="bg-[#7C3AED] text-white text-xs">
                       {p.user?.displayName?.[0] || p.user?.name?.[0] || "?"}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-[#E6EEF8] text-xs">
+                  <span className="text-[#E6EEF8] text-sm font-medium">
                     {p.user?.displayName || p.user?.name || "Guest"}
                   </span>
-                </div>
+                  {p.user?.isPremium && (
+                    <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0 text-xs px-2 py-0">
+                      VIP
+                    </Badge>
+                  )}
+                </motion.div>
               ))}
             </div>
           </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            <AnimatePresence>
-              {messages?.map((msg) => (
-                <motion.div
-                  key={msg._id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="flex gap-2"
-                >
-                  <Avatar className="w-8 h-8 flex-shrink-0">
-                    <AvatarFallback className="bg-[#7C3AED] text-white text-xs">
-                      {msg.user?.displayName?.[0] || msg.user?.name?.[0] || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[#E6EEF8] text-sm font-medium">
-                        {msg.user?.displayName || msg.user?.name || "Guest"}
-                      </span>
-                      {msg.user?.isPremium && (
-                        <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0 text-xs px-1 py-0">
-                          Premium
-                        </Badge>
-                      )}
-                      <span className="text-[#E6EEF8]/50 text-xs">
-                        {new Date(msg.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                    <p className="text-[#E6EEF8]/90 text-sm break-words">
-                      {msg.text}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            
-            {/* Typing Indicator */}
-            <AnimatePresence>
-              {isTyping && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-2 text-[#E6EEF8]/70 text-sm"
-                >
-                  <div className="flex gap-1">
-                    <motion.div
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                      className="w-2 h-2 rounded-full bg-[#7C3AED]"
-                    />
-                    <motion.div
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-                      className="w-2 h-2 rounded-full bg-[#7C3AED]"
-                    />
-                    <motion.div
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
-                      className="w-2 h-2 rounded-full bg-[#7C3AED]"
-                    />
-                  </div>
-                  <span>You are typing...</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Message Input */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-white/10">
-            <div className="flex gap-2">
-              <Input
-                value={messageText}
-                onChange={(e) => handleTyping(e.target.value)}
-                placeholder="Type a message..."
-                className="bg-[#1E293B] border-white/10 text-white"
-                disabled={isSending}
-              />
-              <Button
-                type="submit"
-                disabled={isSending || !messageText.trim()}
-                className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] hover:opacity-90 text-white"
-              >
-                {isSending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-          </form>
         </div>
       </div>
+
+      {/* Fixed Bottom-Right Messenger-Style Chat Box */}
+      <motion.div
+        initial={{ opacity: 0, y: 100, scale: 0.8 }}
+        animate={{ 
+          opacity: 1, 
+          y: 0, 
+          scale: 1,
+          height: isChatMinimized ? "60px" : "600px"
+        }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="fixed bottom-6 right-6 w-[400px] bg-white rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col"
+        style={{
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1)"
+        }}
+      >
+        {/* Chat Header - Fixed */}
+        <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-lg">Chat</h3>
+              <p className="text-white/80 text-xs">
+                {participants?.length || 0} online
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setIsChatMinimized(!isChatMinimized)}
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20 h-8 w-8"
+            >
+              <Minimize2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Messages Area - Scrollable */}
+        {!isChatMinimized && (
+          <>
+            <div className="flex-1 overflow-y-auto p-4 bg-[#F5F5F5] space-y-3">
+              <AnimatePresence>
+                {messages?.map((msg, index) => {
+                  const isOwnMessage = msg.userId === user?._id;
+                  return (
+                    <motion.div
+                      key={msg._id}
+                      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ 
+                        duration: 0.3, 
+                        delay: index * 0.05,
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20
+                      }}
+                      className={`flex gap-2 ${isOwnMessage ? "flex-row-reverse" : "flex-row"}`}
+                    >
+                      {!isOwnMessage && (
+                        <Avatar className="w-8 h-8 flex-shrink-0">
+                          <AvatarFallback className="bg-[#0084FF] text-white text-xs">
+                            {msg.user?.displayName?.[0] || msg.user?.name?.[0] || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div className={`flex flex-col ${isOwnMessage ? "items-end" : "items-start"} max-w-[70%]`}>
+                        {!isOwnMessage && (
+                          <div className="flex items-center gap-2 mb-1 px-1">
+                            <span className="text-xs font-semibold text-gray-700">
+                              {msg.user?.displayName || msg.user?.name || "Guest"}
+                            </span>
+                            {msg.user?.isPremium && (
+                              <Badge className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-white border-0 text-[10px] px-1.5 py-0">
+                                VIP
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                        <motion.div
+                          whileHover={{ scale: 1.02 }}
+                          className={`rounded-2xl px-4 py-2 ${
+                            isOwnMessage
+                              ? "bg-gradient-to-r from-[#0084FF] to-[#00A3FF] text-white"
+                              : "bg-white text-gray-800 shadow-sm"
+                          }`}
+                        >
+                          <p className="text-sm break-words">{msg.text}</p>
+                        </motion.div>
+                        <span className="text-[10px] text-gray-500 mt-1 px-1">
+                          {new Date(msg.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+              
+              {/* Typing Indicator */}
+              <AnimatePresence>
+                {isTyping && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center gap-2"
+                  >
+                    <Avatar className="w-8 h-8">
+                      <AvatarFallback className="bg-[#0084FF] text-white text-xs">
+                        {user?.displayName?.[0] || user?.name?.[0] || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="bg-white rounded-2xl px-4 py-3 shadow-sm">
+                      <div className="flex gap-1">
+                        <motion.div
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                          className="w-2 h-2 rounded-full bg-gray-400"
+                        />
+                        <motion.div
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                          className="w-2 h-2 rounded-full bg-gray-400"
+                        />
+                        <motion.div
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                          className="w-2 h-2 rounded-full bg-gray-400"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Section - Fixed at Bottom */}
+            <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-gray-200">
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={messageText}
+                  onChange={(e) => handleTyping(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 rounded-full border-gray-300 bg-[#F5F5F5] focus:bg-white transition-colors"
+                  disabled={isSending}
+                />
+                <motion.div whileTap={{ scale: 0.9 }}>
+                  <Button
+                    type="submit"
+                    disabled={isSending || !messageText.trim()}
+                    size="icon"
+                    className="rounded-full bg-gradient-to-r from-[#0084FF] to-[#00A3FF] hover:opacity-90 text-white h-10 w-10 shadow-lg"
+                  >
+                    {isSending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                  </Button>
+                </motion.div>
+              </div>
+            </form>
+          </>
+        )}
+      </motion.div>
     </div>
   );
 }
