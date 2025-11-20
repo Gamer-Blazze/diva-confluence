@@ -37,6 +37,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       navigate(redirect);
     }
   }, [authLoading, isAuthenticated, navigate, redirectAfterAuth]);
+
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -85,7 +86,13 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     try {
       console.log("Attempting anonymous sign in...");
       await signIn("anonymous");
-      console.log("Anonymous sign in successful");
+      
+      // Generate and store guest token
+      const guestToken = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      localStorage.setItem("diva_guest_token", guestToken);
+      localStorage.setItem("diva_guest_timestamp", Date.now().toString());
+      
+      console.log("Anonymous sign in successful, guest token stored");
       const redirect = redirectAfterAuth || "/";
       navigate(redirect);
     } catch (error) {
