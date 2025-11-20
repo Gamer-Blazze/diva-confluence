@@ -189,21 +189,8 @@ export default function Room() {
         </div>
       </div>
 
-      {/* Fixed Bottom-Right Messenger-Style Chat Box */}
-      <motion.div
-        initial={{ opacity: 0, y: 100, scale: 0.8 }}
-        animate={{ 
-          opacity: 1, 
-          y: 0, 
-          scale: 1,
-          height: isChatMinimized ? "60px" : "600px"
-        }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="fixed bottom-6 right-6 w-[400px] bg-white rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col"
-        style={{
-          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1)"
-        }}
-      >
+      {/* Full Screen Messenger-Style Chat */}
+      <div className="flex-1 bg-white flex flex-col overflow-hidden">
         {/* Chat Header - Fixed */}
         <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -217,21 +204,10 @@ export default function Room() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setIsChatMinimized(!isChatMinimized)}
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-white/20 h-8 w-8"
-            >
-              <Minimize2 className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
 
         {/* Messages Area - Scrollable */}
-        {!isChatMinimized && (
-          <>
+        <>
             <div className="flex-1 overflow-y-auto p-4 bg-[#F5F5F5] space-y-3">
               <AnimatePresence>
                 {messages?.map((msg, index) => {
@@ -359,9 +335,8 @@ export default function Room() {
                 </motion.div>
               </div>
             </form>
-          </>
-        )}
-      </motion.div>
+        </>
+      </div>
     </div>
   );
 }
