@@ -190,17 +190,22 @@ export default function Room() {
       </div>
 
       {/* Full Screen Messenger-Style Chat */}
-      <div className="flex-1 bg-white flex flex-col overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="flex-1 bg-white flex flex-col overflow-hidden"
+      >
         {/* Chat Header - Fixed */}
-        <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-white" />
+        <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] p-6 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <MessageSquare className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-lg">Chat</h3>
-              <p className="text-white/80 text-xs">
-                {participants?.length || 0} online
+              <h3 className="text-white font-bold text-2xl">Chat</h3>
+              <p className="text-white/90 text-sm">
+                {participants?.length || 0} participants online
               </p>
             </div>
           </div>
@@ -208,7 +213,7 @@ export default function Room() {
 
         {/* Messages Area - Scrollable */}
         <>
-            <div className="flex-1 overflow-y-auto p-4 bg-[#F5F5F5] space-y-3">
+            <div className="flex-1 overflow-y-auto p-6 bg-[#F5F5F5] space-y-4">
               <AnimatePresence>
                 {messages?.map((msg, index) => {
                   const isOwnMessage = msg.userId === user?._id;
@@ -310,13 +315,13 @@ export default function Room() {
             </div>
 
             {/* Input Section - Fixed at Bottom */}
-            <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-gray-200">
-              <div className="flex gap-2 items-center">
+            <form onSubmit={handleSendMessage} className="p-6 bg-white border-t border-gray-200 shadow-lg">
+              <div className="flex gap-3 items-center max-w-4xl mx-auto">
                 <Input
                   value={messageText}
                   onChange={(e) => handleTyping(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 rounded-full border-gray-300 bg-[#F5F5F5] focus:bg-white transition-colors"
+                  className="flex-1 rounded-full border-gray-300 bg-[#F5F5F5] focus:bg-white transition-colors text-base py-6"
                   disabled={isSending}
                 />
                 <motion.div whileTap={{ scale: 0.9 }}>
@@ -324,19 +329,19 @@ export default function Room() {
                     type="submit"
                     disabled={isSending || !messageText.trim()}
                     size="icon"
-                    className="rounded-full bg-gradient-to-r from-[#0084FF] to-[#00A3FF] hover:opacity-90 text-white h-10 w-10 shadow-lg"
+                    className="rounded-full bg-gradient-to-r from-[#0084FF] to-[#00A3FF] hover:opacity-90 text-white h-12 w-12 shadow-lg"
                   >
                     {isSending ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                      <Send className="w-5 h-5" />
+                      <Send className="w-6 h-6" />
                     )}
                   </Button>
                 </motion.div>
               </div>
             </form>
         </>
-      </div>
+      </motion.div>
     </div>
   );
 }
