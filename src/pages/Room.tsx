@@ -157,17 +157,6 @@ export default function Room() {
               <p className="text-[#E6EEF8]/70">Video conferencing coming soon</p>
             </div>
           </Card>
-          
-          {/* Floating Controls */}
-          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-14 h-14 rounded-full bg-[#1E293B] border border-white/10 flex items-center justify-center text-white hover:bg-white/10"
-            >
-              <Video className="w-6 h-6" />
-            </motion.button>
-          </div>
         </div>
 
         {/* Chat Sidebar */}
