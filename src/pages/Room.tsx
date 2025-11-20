@@ -197,16 +197,23 @@ export default function Room() {
         className="flex-1 bg-white flex flex-col overflow-hidden"
       >
         {/* Chat Header - Fixed */}
-        <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] p-6 flex items-center justify-between shadow-md">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-white" />
-            </div>
+        <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] p-4 sm:p-6 flex items-center justify-between shadow-lg border-b border-white/10">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <motion.div 
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-md" />
+            </motion.div>
             <div>
-              <h3 className="text-white font-bold text-2xl">Chat</h3>
-              <p className="text-white/90 text-sm">
-                {participants?.length || 0} participants online
-              </p>
+              <h3 className="text-white font-bold text-xl sm:text-2xl tracking-tight drop-shadow-sm">Chat</h3>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-sm shadow-green-400/50" />
+                <p className="text-white/95 text-xs sm:text-sm font-medium">
+                  {participants?.length || 0} online
+                </p>
+              </div>
             </div>
           </div>
         </div>
