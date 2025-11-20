@@ -116,15 +116,15 @@ export default function Room() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex flex-col">
-      {/* Modern Group Chat Interface */}
+    <div className="h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex flex-col overflow-hidden">
+      {/* Modern Group Chat Interface - Full Screen */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8"
+        className="flex-1 flex flex-col overflow-hidden"
       >
-        <div className="w-full max-w-5xl h-[calc(100vh-12rem)] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+        <div className="flex-1 flex flex-col bg-white overflow-hidden">
           {/* Chat Header - Fixed within chat box */}
           <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] px-6 py-4 flex items-center justify-between shadow-md flex-shrink-0">
             <div className="flex items-center gap-3">
