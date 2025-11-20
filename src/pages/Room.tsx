@@ -213,7 +213,7 @@ export default function Room() {
 
         {/* Messages Area - Scrollable */}
         <>
-            <div className="flex-1 overflow-y-auto p-6 bg-[#F5F5F5] space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 bg-[#F5F5F5] space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
               <AnimatePresence>
                 {messages?.map((msg, index) => {
                   const isOwnMessage = msg.userId === user?._id;
