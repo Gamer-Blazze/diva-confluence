@@ -174,14 +174,6 @@ export default function Room() {
             >
               <Video className="w-6 h-6" />
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLeaveRoom}
-              className="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-600"
-            >
-              <PhoneOff className="w-6 h-6" />
-            </motion.button>
           </div>
         </div>
 
