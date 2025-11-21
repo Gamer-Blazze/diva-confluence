@@ -181,6 +181,7 @@ export const getRoomMessages = query({
             name: user.name,
             displayName: user.displayName,
             isPremium: user.isPremium,
+            role: user.role,
           } : null,
         };
       })

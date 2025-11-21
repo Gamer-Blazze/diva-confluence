@@ -190,6 +190,11 @@ export default function Room() {
                             <span className="text-xs font-semibold text-gray-700">
                               {msg.user?.displayName || msg.user?.name || "Guest"}
                             </span>
+                            {msg.user?.role === "admin" && (
+                              <Badge className="bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white border-0 text-[10px] px-1.5 py-0">
+                                Admin
+                              </Badge>
+                            )}
                             {msg.user?.isPremium && (
                               <Badge className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-white border-0 text-[10px] px-1.5 py-0">
                                 VIP
