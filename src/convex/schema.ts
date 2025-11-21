@@ -18,6 +18,7 @@ export type Role = Infer<typeof roleValidator>;
 export const roomTypeValidator = v.union(
   v.literal("free"),
   v.literal("premium"),
+  v.literal("unlimited"),
 );
 export type RoomType = Infer<typeof roomTypeValidator>;
 

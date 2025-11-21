@@ -5,7 +5,7 @@ import { getCurrentUser } from "./users";
 export const createRoom = mutation({
   args: {
     title: v.string(),
-    type: v.union(v.literal("free"), v.literal("premium")),
+    type: v.union(v.literal("free"), v.literal("premium"), v.literal("unlimited")),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
@@ -13,12 +13,16 @@ export const createRoom = mutation({
       throw new Error("Unauthorized");
     }
 
+    if (args.type === "unlimited" && user.role !== "admin") {
+      throw new Error("Only admins can create unlimited rooms");
+    }
+
     const roomId = await ctx.db.insert("rooms", {
       title: args.title,
       type: args.type,
       ownerId: user._id,
       isActive: true,
-      maxParticipants: args.type === "premium" ? 100 : 10,
+      maxParticipants: args.type === "unlimited" ? 1000000 : (args.type === "premium" ? 100 : 10),
     });
 
     return roomId;

@@ -31,7 +31,7 @@ export default function Dashboard() {
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [roomTitle, setRoomTitle] = useState("");
-  const [roomType, setRoomType] = useState<"free" | "premium">("free");
+  const [roomType, setRoomType] = useState<"free" | "premium" | "unlimited">("free");
   const [isCreating, setIsCreating] = useState(false);
   const [deleteRoomId, setDeleteRoomId] = useState<string | null>(null);
 
@@ -181,13 +181,16 @@ export default function Dashboard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="type" className="text-white">Room Type</Label>
-                    <Select value={roomType} onValueChange={(value: "free" | "premium") => setRoomType(value)}>
+                    <Select value={roomType} onValueChange={(value: "free" | "premium" | "unlimited") => setRoomType(value)}>
                       <SelectTrigger className="bg-[#0F172A] border-white/10 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-[#1E293B] border-white/10">
                         <SelectItem value="free">Free (Up to 10 participants)</SelectItem>
                         <SelectItem value="premium">Premium (Up to 100 participants)</SelectItem>
+                        {isAdmin && (
+                          <SelectItem value="unlimited">Unlimited (Admin Only)</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -245,6 +248,11 @@ export default function Dashboard() {
                               {room.type === "premium" && (
                                 <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0">
                                   Premium
+                                </Badge>
+                              )}
+                              {room.type === "unlimited" && (
+                                <Badge className="bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white border-0">
+                                  Unlimited
                                 </Badge>
                               )}
                               <Badge className={room.isActive ? "bg-green-500/20 text-green-400 border-green-500/50" : "bg-red-500/20 text-red-400 border-red-500/50"}>
@@ -326,6 +334,11 @@ export default function Dashboard() {
                           {room.type === "premium" && (
                             <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0">
                               Premium
+                            </Badge>
+                          )}
+                          {room.type === "unlimited" && (
+                            <Badge className="bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white border-0">
+                              Unlimited
                             </Badge>
                           )}
                         </div>
