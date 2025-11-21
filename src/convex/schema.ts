@@ -65,7 +65,8 @@ const schema = defineSchema(
       userId: v.id("users"),
       text: v.string(),
       timestamp: v.number(),
-    }).index("by_room", ["roomId"]),
+    }).index("by_room", ["roomId"])
+      .index("by_timestamp", ["timestamp"]),
   },
   {
     schemaValidation: false,

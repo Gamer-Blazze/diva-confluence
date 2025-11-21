@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { getCurrentUser } from "./users";
 
 export const sendMessage = mutation({
@@ -49,5 +49,22 @@ export const getRoomMessages = query({
     );
 
     return messagesWithUsers;
+  },
+});
+
+export const deleteOldMessages = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    
+    // Find messages older than 24 hours
+    const oldMessages = await ctx.db
+      .query("messages")
+      .withIndex("by_timestamp", (q) => q.lt("timestamp", oneDayAgo))
+      .take(1000); // Process in batches to avoid timeouts
+
+    for (const msg of oldMessages) {
+      await ctx.db.delete(msg._id);
+    }
   },
 });

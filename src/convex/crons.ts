@@ -11,4 +11,12 @@ crons.interval(
   {},
 );
 
+// Delete messages older than 24 hours every hour
+crons.interval(
+  "delete old messages",
+  { hours: 1 },
+  internal.messages.deleteOldMessages,
+  {},
+);
+
 export default crons;
