@@ -28,7 +28,7 @@ export const emailOtp = Email({
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       // Give cleaner server logs
       console.error("DIVA SEND EMAIL ERROR:", error?.response?.data || error);
       throw new Error("Failed to send OTP email.");
