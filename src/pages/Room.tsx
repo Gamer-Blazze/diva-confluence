@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2, Edit2, Check } from "lucide-react";
+import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2, Edit2, Check, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
@@ -28,6 +28,7 @@ export default function Room() {
   
   const [messageText, setMessageText] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<any>(null);
   const [editText, setEditText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -83,8 +84,10 @@ export default function Room() {
       await sendMessage({
         roomId: roomId as Id<"rooms">,
         text: messageText.trim(),
+        parentMessageId: replyingTo?._id,
       });
       setMessageText("");
+      setReplyingTo(null);
       setIsTyping(false);
     } catch (error) {
       toast.error("Failed to send message");
@@ -113,6 +116,15 @@ export default function Room() {
   const startEditing = (msg: any) => {
     setEditingMessageId(msg._id);
     setEditText(msg.text);
+    setReplyingTo(null);
+  };
+
+  const startReplying = (msg: any) => {
+    setReplyingTo(msg);
+    setEditingMessageId(null);
+    // Focus input
+    const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+    if (input) input.focus();
   };
 
   const handleTyping = (value: string) => {
@@ -230,6 +242,15 @@ export default function Room() {
                           </div>
                         )}
                         
+                        {msg.parentMessage && (
+                          <div className={`mb-1 text-xs px-3 py-2 rounded-lg bg-gray-100 border-l-4 border-[#0084FF] opacity-80 ${isOwnMessage ? "mr-1" : "ml-1"}`}>
+                            <p className="font-semibold text-gray-600 mb-0.5">
+                              Replying to {msg.parentMessage.user?.displayName || msg.parentMessage.user?.name || "User"}
+                            </p>
+                            <p className="text-gray-500 truncate max-w-[200px]">{msg.parentMessage.text}</p>
+                          </div>
+                        )}
+
                         {isEditing ? (
                           <div className="flex items-center gap-2">
                             <Input
@@ -271,8 +292,16 @@ export default function Room() {
                             >
                               <p className="text-sm break-words">{msg.text}</p>
                             </motion.div>
-                            {canEdit && (
-                              <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? "-left-8" : "-right-8"} opacity-0 group-hover/message:opacity-100 transition-opacity`}>
+                            <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? "-left-16" : "-right-16"} opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1`}>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-6 w-6 text-gray-400 hover:text-[#0084FF]"
+                                onClick={() => startReplying(msg)}
+                              >
+                                <Reply className="w-3 h-3" />
+                              </Button>
+                              {canEdit && (
                                 <Button
                                   size="icon"
                                   variant="ghost"
@@ -281,8 +310,8 @@ export default function Room() {
                                 >
                                   <Edit2 className="w-3 h-3" />
                                 </Button>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         )}
                         <span className="text-[10px] text-gray-500 mt-1 px-1">
@@ -338,31 +367,56 @@ export default function Room() {
             </div>
 
           {/* Input Section - Fixed at Bottom within chat box */}
-          <form onSubmit={handleSendMessage} className="px-6 py-4 bg-white border-t border-gray-200 shadow-inner flex-shrink-0">
-            <div className="flex gap-3 items-center">
-              <Input
-                value={messageText}
-                onChange={(e) => handleTyping(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 rounded-full border-gray-300 bg-[#F5F5F5] focus:bg-white transition-all duration-200 text-base py-5 px-5 focus:ring-2 focus:ring-[#0084FF]/30"
-                disabled={isSending}
-              />
-              <motion.div whileTap={{ scale: 0.9 }}>
+          <div className="bg-white border-t border-gray-200 shadow-inner flex-shrink-0">
+            {replyingTo && (
+              <div className="px-6 py-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <Reply className="w-4 h-4 text-[#0084FF]" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-gray-700">
+                      Replying to {replyingTo.user?.displayName || replyingTo.user?.name || "User"}
+                    </span>
+                    <span className="text-xs text-gray-500 truncate max-w-[300px]">
+                      {replyingTo.text}
+                    </span>
+                  </div>
+                </div>
                 <Button
-                  type="submit"
-                  disabled={isSending || !messageText.trim()}
                   size="icon"
-                  className="rounded-full bg-gradient-to-r from-[#0084FF] to-[#00A3FF] hover:opacity-90 text-white h-12 w-12 shadow-lg hover:shadow-xl transition-all duration-200"
+                  variant="ghost"
+                  className="h-6 w-6 text-gray-400 hover:text-red-500"
+                  onClick={() => setReplyingTo(null)}
                 >
-                  {isSending ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
+                  <X className="w-4 h-4" />
                 </Button>
-              </motion.div>
-            </div>
-          </form>
+              </div>
+            )}
+            <form onSubmit={handleSendMessage} className="px-6 py-4">
+              <div className="flex gap-3 items-center">
+                <Input
+                  value={messageText}
+                  onChange={(e) => handleTyping(e.target.value)}
+                  placeholder={replyingTo ? "Type your reply..." : "Type a message..."}
+                  className="flex-1 rounded-full border-gray-300 bg-[#F5F5F5] focus:bg-white transition-all duration-200 text-base py-5 px-5 focus:ring-2 focus:ring-[#0084FF]/30"
+                  disabled={isSending}
+                />
+                <motion.div whileTap={{ scale: 0.9 }}>
+                  <Button
+                    type="submit"
+                    disabled={isSending || !messageText.trim()}
+                    size="icon"
+                    className="rounded-full bg-gradient-to-r from-[#0084FF] to-[#00A3FF] hover:opacity-90 text-white h-12 w-12 shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    {isSending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                  </Button>
+                </motion.div>
+              </div>
+            </form>
+          </div>
         </div>
       </motion.div>
     </div>

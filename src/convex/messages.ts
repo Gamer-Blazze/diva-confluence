@@ -6,6 +6,7 @@ export const sendMessage = mutation({
   args: {
     roomId: v.id("rooms"),
     text: v.string(),
+    parentMessageId: v.optional(v.id("messages")),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
@@ -18,6 +19,7 @@ export const sendMessage = mutation({
       userId: user._id,
       text: args.text,
       timestamp: Date.now(),
+      parentMessageId: args.parentMessageId,
     });
 
     return messageId;
@@ -67,6 +69,21 @@ export const getRoomMessages = query({
     const messagesWithUsers = await Promise.all(
       messages.map(async (msg) => {
         const user = await ctx.db.get(msg.userId);
+        let parentMessage = null;
+        if (msg.parentMessageId) {
+          const parent = await ctx.db.get(msg.parentMessageId);
+          if (parent) {
+            const parentUser = await ctx.db.get(parent.userId);
+            parentMessage = {
+              text: parent.text,
+              user: parentUser ? {
+                displayName: parentUser.displayName,
+                name: parentUser.name,
+              } : null,
+            };
+          }
+        }
+
         return {
           ...msg,
           user: user ? {
@@ -75,6 +92,7 @@ export const getRoomMessages = query({
             isPremium: user.isPremium,
             role: user.role,
           } : null,
+          parentMessage,
         };
       })
     );

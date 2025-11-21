@@ -179,6 +179,22 @@ export const getRoomMessages = query({
     const messagesWithUsers = await Promise.all(
       messages.map(async (msg) => {
         const user = await ctx.db.get(msg.userId);
+        
+        let parentMessage = null;
+        if (msg.parentMessageId) {
+          const parent = await ctx.db.get(msg.parentMessageId);
+          if (parent) {
+            const parentUser = await ctx.db.get(parent.userId);
+            parentMessage = {
+              text: parent.text,
+              user: parentUser ? {
+                displayName: parentUser.displayName,
+                name: parentUser.name,
+              } : null,
+            };
+          }
+        }
+
         return {
           ...msg,
           user: user ? {
@@ -187,6 +203,7 @@ export const getRoomMessages = query({
             isPremium: user.isPremium,
             role: user.role,
           } : null,
+          parentMessage,
         };
       })
     );
