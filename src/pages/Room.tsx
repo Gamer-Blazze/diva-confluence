@@ -128,6 +128,14 @@ export default function Room() {
           {/* Chat Header - Fixed within chat box */}
           <div className="bg-gradient-to-r from-[#0084FF] to-[#00A3FF] px-6 py-4 flex items-center justify-between shadow-md flex-shrink-0">
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20 mr-1"
+                onClick={() => navigate("/dashboard")}
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </Button>
               <motion.div 
                 className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-inner"
                 whileHover={{ scale: 1.05 }}
