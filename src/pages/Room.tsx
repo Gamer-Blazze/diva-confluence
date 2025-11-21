@@ -290,7 +290,14 @@ export default function Room() {
                                   : "bg-white text-gray-800 shadow-sm"
                               }`}
                             >
-                              <p className="text-sm break-words">{msg.text}</p>
+                              <p className="text-sm break-words">
+                                {msg.text}
+                                {msg.isEdited && (
+                                  <span className={`text-[10px] ml-2 ${isOwnMessage ? "text-white/70" : "text-gray-400"}`}>
+                                    (edited)
+                                  </span>
+                                )}
+                              </p>
                             </motion.div>
                             <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? "-left-16" : "-right-16"} opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1`}>
                               <Button

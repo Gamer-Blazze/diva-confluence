@@ -53,6 +53,7 @@ export const editMessage = mutation({
 
     await ctx.db.patch(args.messageId, {
       text: args.text,
+      isEdited: true,
     });
   },
 });
