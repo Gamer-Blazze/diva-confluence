@@ -170,7 +170,7 @@ export default function Landing() {
               {
                 icon: Users,
                 title: "Group Rooms",
-                description: "Create rooms for teams with up to 50 participants on premium",
+                description: "Create rooms for teams with up to 10 participants (Free) or 100 (Premium)",
                 color: "#F59E0B",
               },
               {
