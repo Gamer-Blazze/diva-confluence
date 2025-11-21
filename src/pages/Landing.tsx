@@ -75,10 +75,10 @@ export default function Landing() {
             </motion.div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
-              Connect, Collaborate,
+              Welcome To
               <br />
               <span className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] bg-clip-text text-transparent">
-                Conquer Together
+                Diva
               </span>
             </h1>
 
