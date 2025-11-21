@@ -12,7 +12,7 @@ export const emailOtp = Email({
   async sendVerificationRequest({ identifier: email, provider, token }) {
     try {
       await axios.post(
-        "https://email.vly.ai/send_otp",
+        "https://email.diva.vly.site/send_otp",
         {
           to: email,
           otp: token,
