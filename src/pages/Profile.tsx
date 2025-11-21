@@ -25,7 +25,7 @@ export default function Profile() {
   const handleUpgrade = async () => {
     try {
       await upgradeToPremium({});
-      toast.success("Upgraded to Premium! 🎉");
+      toast.success("Upgraded to Premium for 1 Month! 🎉");
     } catch (error) {
       toast.error("Failed to upgrade");
       console.error(error);
@@ -174,8 +174,18 @@ export default function Profile() {
                     </div>
                     <span className="text-white/90 text-sm">Diva Conference</span>
                   </div>
-                  <div className="flex items-center gap-4 text-white/70 text-xs font-mono">
-                    <span>•••• •••• •••• {user?._id.slice(-4)}</span>
+                  <div className="flex justify-between items-end">
+                    <div className="flex items-center gap-4 text-white/70 text-xs font-mono">
+                      <span>•••• •••• •••• {user?._id.slice(-4)}</span>
+                    </div>
+                    {user?.isPremium && user?.premiumExpiresAt && (
+                      <div className="text-right">
+                        <p className="text-[10px] text-white/60 uppercase tracking-wider">Expires</p>
+                        <p className="text-xs text-white font-medium">
+                          {new Date(user.premiumExpiresAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -211,9 +221,16 @@ export default function Profile() {
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="text-[#E6EEF8]/70">Membership</span>
-                <span className="text-white font-medium">
-                  {user?.isPremium ? "Premium" : "Free"}
-                </span>
+                <div className="text-right">
+                  <span className="text-white font-medium block">
+                    {user?.isPremium ? "Premium" : "Free"}
+                  </span>
+                  {user?.isPremium && user?.premiumExpiresAt && (
+                    <span className="text-xs text-[#F59E0B]">
+                      Expires: {new Date(user.premiumExpiresAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -227,7 +244,7 @@ export default function Profile() {
                   Upgrade to Premium
                 </CardTitle>
                 <CardDescription className="text-[#E6EEF8]/70">
-                  Unlock exclusive features and benefits
+                  Unlock exclusive features and benefits for 1 month
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -254,7 +271,7 @@ export default function Profile() {
                   className="w-full bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] hover:opacity-90 text-white"
                 >
                   <Crown className="w-4 h-4 mr-2" />
-                  Upgrade Now
+                  Upgrade Now (1 Month)
                 </Button>
               </CardContent>
             </Card>

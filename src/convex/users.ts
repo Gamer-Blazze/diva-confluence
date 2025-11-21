@@ -1,5 +1,5 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { query, QueryCtx, mutation } from "./_generated/server";
+import { query, QueryCtx, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { roleValidator } from "./schema";
 
@@ -50,11 +50,38 @@ export const upgradeToPremium = mutation({
       throw new Error("Unauthorized");
     }
 
+    const oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    // If already premium and not expired, extend from current expiration, otherwise from now
+    const currentExpiration = user.premiumExpiresAt || now;
+    const newExpiration = (user.isPremium && currentExpiration > now ? currentExpiration : now) + oneMonthInMs;
+
     await ctx.db.patch(user._id, {
       isPremium: true,
+      premiumExpiresAt: newExpiration,
     });
 
     return user._id;
+  },
+});
+
+export const checkPremiumExpiration = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const expiredUsers = await ctx.db
+      .query("users")
+      .withIndex("by_premium_expiration", (q) => 
+        q.eq("isPremium", true).lt("premiumExpiresAt", now)
+      )
+      .take(100); // Process in batches
+
+    for (const user of expiredUsers) {
+      await ctx.db.patch(user._id, {
+        isPremium: false,
+        premiumExpiresAt: undefined,
+      });
+    }
   },
 });
 

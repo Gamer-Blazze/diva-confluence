@@ -33,10 +33,12 @@ const schema = defineSchema(
       isAnonymous: v.optional(v.boolean()),
       role: v.optional(roleValidator),
       isPremium: v.optional(v.boolean()),
+      premiumExpiresAt: v.optional(v.number()),
       displayName: v.optional(v.string()),
       isGuest: v.optional(v.boolean()),
       guestToken: v.optional(v.string()),
-    }).index("email", ["email"]),
+    }).index("email", ["email"])
+      .index("by_premium_expiration", ["isPremium", "premiumExpiresAt"]),
 
     rooms: defineTable({
       title: v.string(),
