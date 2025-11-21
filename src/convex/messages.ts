@@ -82,6 +82,48 @@ export const editMessage = mutation({
   },
 });
 
+export const toggleReaction = mutation({
+  args: {
+    messageId: v.id("messages"),
+    emoji: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+
+    const message = await ctx.db.get(args.messageId);
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    const reactions = message.reactions || [];
+    const existingReactionIndex = reactions.findIndex(
+      (r) => r.userId === user._id && r.emoji === args.emoji
+    );
+
+    let newReactions;
+    if (existingReactionIndex !== -1) {
+      // Remove reaction if it already exists (toggle off)
+      newReactions = [
+        ...reactions.slice(0, existingReactionIndex),
+        ...reactions.slice(existingReactionIndex + 1),
+      ];
+    } else {
+      // Add reaction
+      // First remove any other reaction by this user if we want single reaction per user? 
+      // Or allow multiple? Usually multiple is fine, but let's check if we want to limit.
+      // Let's allow multiple different emojis, but toggling the same one removes it.
+      newReactions = [...reactions, { userId: user._id, emoji: args.emoji }];
+    }
+
+    await ctx.db.patch(args.messageId, {
+      reactions: newReactions,
+    });
+  },
+});
+
 export const getRoomMessages = query({
   args: { roomId: v.id("rooms") },
   handler: async (ctx, args) => {
@@ -109,6 +151,20 @@ export const getRoomMessages = query({
           }
         }
 
+        // Process reactions to include user details
+        const reactionsWithUsers = msg.reactions ? await Promise.all(
+          msg.reactions.map(async (reaction) => {
+            const reactionUser = await ctx.db.get(reaction.userId);
+            return {
+              ...reaction,
+              user: reactionUser ? {
+                displayName: reactionUser.displayName,
+                name: reactionUser.name,
+              } : null,
+            };
+          })
+        ) : [];
+
         return {
           ...msg,
           user: user ? {
@@ -118,6 +174,7 @@ export const getRoomMessages = query({
             role: user.role,
           } : null,
           parentMessage,
+          reactions: reactionsWithUsers,
         };
       })
     );

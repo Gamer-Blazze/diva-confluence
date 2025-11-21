@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2, Edit2, Check, Reply, Trash2 } from "lucide-react";
+import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2, Edit2, Check, Reply, Trash2, Smile, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Id } from "@/convex/_generated/dataModel";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export default function Room() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function Room() {
   const sendMessage = useMutation(api.messages.sendMessage);
   const editMessage = useMutation(api.messages.editMessage);
   const deleteMessage = useMutation(api.messages.deleteMessage);
+  const toggleReaction = useMutation(api.messages.toggleReaction);
   const joinRoom = useMutation(api.rooms.joinRoom);
   const leaveRoom = useMutation(api.rooms.leaveRoom);
   const markAsSeen = useMutation(api.rooms.markAsSeen);
@@ -83,6 +85,18 @@ export default function Room() {
         toast.error("Failed to leave room");
         console.error(error);
       }
+    }
+  };
+
+  const handleToggleReaction = async (messageId: string, emoji: string) => {
+    try {
+      await toggleReaction({
+        messageId: messageId as Id<"messages">,
+        emoji,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add reaction");
     }
   };
 
@@ -166,6 +180,8 @@ export default function Room() {
       setIsTyping(false);
     }, 2000);
   };
+
+  const COMMON_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"];
 
   if (isLoading || !room) {
     return (
@@ -327,7 +343,66 @@ export default function Room() {
                                 )}
                               </p>
                             </motion.div>
-                            <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? "-left-24" : "-right-24"} opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1`}>
+                            
+                            {/* Reactions Display */}
+                            {msg.reactions && msg.reactions.length > 0 && (
+                              <div className={`flex flex-wrap gap-1 mt-1 ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+                                {Array.from(new Set((msg.reactions || []).map((r: any) => r.emoji))).map((emoji: any) => {
+                                  const count = msg.reactions?.filter((r: any) => r.emoji === emoji).length || 0;
+                                  const hasReacted = msg.reactions?.some((r: any) => r.emoji === emoji && r.userId === user?._id) || false;
+                                  const reactors = (msg.reactions || [])
+                                    .filter((r: any) => r.emoji === emoji)
+                                    .map((r: any) => r.user?.displayName || r.user?.name || "User")
+                                    .join(", ");
+                                  
+                                  return (
+                                    <div key={emoji} className="relative group/reaction">
+                                      <button
+                                        onClick={() => handleToggleReaction(msg._id, emoji)}
+                                        className={`text-xs px-1.5 py-0.5 rounded-full border flex items-center gap-1 transition-colors ${
+                                          hasReacted 
+                                            ? "bg-[#0084FF]/10 border-[#0084FF]/30 text-[#0084FF]" 
+                                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                                        }`}
+                                      >
+                                        <span>{emoji}</span>
+                                        <span className="font-medium">{count}</span>
+                                      </button>
+                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover/reaction:block whitespace-nowrap bg-black/75 text-white text-[10px] px-2 py-1 rounded z-10">
+                                        {reactors}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? "-left-32" : "-right-32"} opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1 items-center`}>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-6 w-6 text-gray-400 hover:text-[#F59E0B]"
+                                  >
+                                    <Smile className="w-3 h-3" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-2 bg-white border-gray-200 shadow-lg" side="top">
+                                  <div className="flex gap-1">
+                                    {COMMON_REACTIONS.map((emoji) => (
+                                      <button
+                                        key={emoji}
+                                        onClick={() => handleToggleReaction(msg._id, emoji)}
+                                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-lg transition-colors"
+                                      >
+                                        {emoji}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                              
                               <Button
                                 size="icon"
                                 variant="ghost"

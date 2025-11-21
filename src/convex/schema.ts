@@ -69,6 +69,10 @@ const schema = defineSchema(
       timestamp: v.number(),
       parentMessageId: v.optional(v.id("messages")),
       isEdited: v.optional(v.boolean()),
+      reactions: v.optional(v.array(v.object({
+        userId: v.id("users"),
+        emoji: v.string(),
+      }))),
     }).index("by_room", ["roomId"])
       .index("by_timestamp", ["timestamp"]),
   },
