@@ -226,6 +226,8 @@ export default function Room() {
                   const canEdit = isOwnMessage && (Date.now() - msg.timestamp < 3 * 60 * 1000);
                   const canDelete = isOwnMessage || isAdmin;
                   const isEditing = editingMessageId === msg._id;
+                  const isLastMessage = index === messages.length - 1;
+                  const seenByParticipants = participants?.filter(p => p.lastSeenMessageId === msg._id && p.userId !== user?._id && p.isActive) || [];
 
                   return (
                     <motion.div
@@ -359,12 +361,10 @@ export default function Room() {
                         )}
                         
                         {/* Seen Indicators */}
-                        {participants && participants.length > 0 && (
-                          <div className={`flex justify-${isOwnMessage ? "end" : "start"} px-12 -mt-2 mb-2`}>
+                        {seenByParticipants.length > 0 && (
+                          <div className={`flex flex-col ${isOwnMessage ? "items-end" : "items-start"} px-12 -mt-2 mb-2`}>
                             <div className="flex -space-x-2 overflow-hidden">
-                              {participants
-                                .filter(p => p.lastSeenMessageId === msg._id && p.userId !== user?._id && p.isActive)
-                                .map((p) => (
+                              {seenByParticipants.map((p) => (
                                   <div key={p._id} className="relative group/seen">
                                     <Avatar className="w-4 h-4 border-2 border-white ring-1 ring-gray-100">
                                       <AvatarFallback className="bg-gray-200 text-[8px] text-gray-600">
@@ -377,6 +377,13 @@ export default function Room() {
                                   </div>
                                 ))}
                             </div>
+                            {isOwnMessage && isLastMessage && (
+                              <span className="text-[10px] text-gray-400 font-medium mt-1">
+                                Seen by {seenByParticipants.length === 1 
+                                  ? (seenByParticipants[0].user?.displayName || seenByParticipants[0].user?.name) 
+                                  : `${seenByParticipants.length} people`}
+                              </span>
+                            )}
                           </div>
                         )}
                         <span className="text-[10px] text-gray-500 mt-1 px-1">

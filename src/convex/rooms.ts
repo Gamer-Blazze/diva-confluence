@@ -197,7 +197,7 @@ export const getRoomMessages = query({
     const messages = await ctx.db
       .query("messages")
       .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
-      .order("asc")
+      .order("desc")
       .take(100);
 
     const messagesWithUsers = await Promise.all(
@@ -232,7 +232,7 @@ export const getRoomMessages = query({
       })
     );
 
-    return messagesWithUsers;
+    return messagesWithUsers.reverse();
   },
 });
 
