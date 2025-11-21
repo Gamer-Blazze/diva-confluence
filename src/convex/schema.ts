@@ -56,6 +56,8 @@ const schema = defineSchema(
       userId: v.id("users"),
       joinedAt: v.number(),
       isActive: v.boolean(),
+      lastSeenMessageId: v.optional(v.id("messages")),
+      lastSeenTimestamp: v.optional(v.number()),
     }).index("by_room", ["roomId"])
       .index("by_user", ["userId"])
       .index("by_room_and_user", ["roomId", "userId"]),

@@ -25,6 +25,7 @@ export default function Room() {
   const editMessage = useMutation(api.messages.editMessage);
   const joinRoom = useMutation(api.rooms.joinRoom);
   const leaveRoom = useMutation(api.rooms.leaveRoom);
+  const markAsSeen = useMutation(api.rooms.markAsSeen);
   
   const [messageText, setMessageText] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -60,7 +61,16 @@ export default function Room() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    
+    // Mark last message as seen when messages update
+    if (messages && messages.length > 0 && roomId) {
+      const lastMessage = messages[messages.length - 1];
+      markAsSeen({ 
+        roomId: roomId as Id<"rooms">, 
+        messageId: lastMessage._id 
+      }).catch(console.error);
+    }
+  }, [messages, roomId]);
 
   const handleLeaveRoom = async () => {
     if (roomId) {
@@ -318,6 +328,28 @@ export default function Room() {
                                   <Edit2 className="w-3 h-3" />
                                 </Button>
                               )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Seen Indicators */}
+                        {participants && participants.length > 0 && (
+                          <div className={`flex justify-${isOwnMessage ? "end" : "start"} px-12 -mt-2 mb-2`}>
+                            <div className="flex -space-x-2 overflow-hidden">
+                              {participants
+                                .filter(p => p.lastSeenMessageId === msg._id && p.userId !== user?._id && p.isActive)
+                                .map((p) => (
+                                  <div key={p._id} className="relative group/seen">
+                                    <Avatar className="w-4 h-4 border-2 border-white ring-1 ring-gray-100">
+                                      <AvatarFallback className="bg-gray-200 text-[8px] text-gray-600">
+                                        {p.user?.displayName?.[0] || p.user?.name?.[0] || "?"}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover/seen:block whitespace-nowrap bg-black/75 text-white text-[10px] px-2 py-1 rounded">
+                                      Seen by {p.user?.displayName || p.user?.name}
+                                    </div>
+                                  </div>
+                                ))}
                             </div>
                           </div>
                         )}

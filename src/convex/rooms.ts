@@ -139,6 +139,30 @@ export const leaveRoom = mutation({
   },
 });
 
+export const markAsSeen = mutation({
+  args: { roomId: v.id("rooms"), messageId: v.id("messages") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+
+    const participant = await ctx.db
+      .query("participants")
+      .withIndex("by_room_and_user", (q) =>
+        q.eq("roomId", args.roomId).eq("userId", user._id)
+      )
+      .first();
+
+    if (participant) {
+      await ctx.db.patch(participant._id, {
+        lastSeenMessageId: args.messageId,
+        lastSeenTimestamp: Date.now(),
+      });
+    }
+  },
+});
+
 export const getRoomParticipants = query({
   args: { roomId: v.id("rooms") },
   handler: async (ctx, args) => {
