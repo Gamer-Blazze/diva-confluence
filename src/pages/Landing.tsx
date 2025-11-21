@@ -64,16 +64,6 @@ export default function Landing() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-center"
           >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#7C3AED]/20 border border-[#7C3AED]/50 rounded-full mb-6"
-            >
-              <Sparkles className="w-4 h-4 text-[#F59E0B]" />
-              <span className="text-sm text-[#E6EEF8]">Premium Video Conferencing</span>
-            </motion.div>
-
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
               Welcome To <span className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] bg-clip-text text-transparent">Diva</span>
             </h1>
