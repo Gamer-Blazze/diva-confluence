@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Video, ArrowLeft, Crown, Sparkles } from "lucide-react";
+import { Video, ArrowLeft, Crown, Sparkles, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 
 export default function Profile() {
@@ -91,7 +92,9 @@ export default function Profile() {
           >
             <div
               className={`relative w-full h-52 rounded-2xl p-6 shadow-2xl overflow-hidden ${
-                user?.isPremium
+                user?.role === "admin"
+                  ? "bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155]"
+                  : user?.isPremium
                   ? "bg-gradient-to-br from-[#7C3AED] via-[#9333EA] to-[#F59E0B]"
                   : "bg-gradient-to-br from-[#1E293B] to-[#0F172A]"
               }`}
@@ -100,7 +103,7 @@ export default function Profile() {
               }}
             >
               {/* Shimmer Effect */}
-              {user?.isPremium && (
+              {(user?.isPremium || user?.role === "admin") && (
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                   animate={{
@@ -114,40 +117,54 @@ export default function Profile() {
                 />
               )}
 
-              {/* Gold Stripe */}
-              {user?.isPremium && (
+              {/* Gold Stripe for Premium, Blue for Admin */}
+              {user?.role === "admin" ? (
+                <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] opacity-30" />
+              ) : user?.isPremium ? (
                 <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-[#F59E0B] to-[#FBBF24] opacity-30" />
-              )}
+              ) : null}
 
               {/* Card Content */}
               <div className="relative z-10 h-full flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-white/80 text-sm mb-1">Member</p>
+                    <p className="text-white/80 text-sm mb-1">
+                      {user?.role === "admin" ? "Administrator" : "Member"}
+                    </p>
                     <h3 className="text-white text-xl font-bold">
                       {user?.displayName || user?.name || "User"}
                     </h3>
                   </div>
-                  {user?.isPremium ? (
-                    <motion.div
-                      animate={{
-                        boxShadow: [
-                          "0 0 10px rgba(245, 158, 11, 0.5)",
-                          "0 0 20px rgba(245, 158, 11, 0.8)",
-                          "0 0 10px rgba(245, 158, 11, 0.5)",
-                        ],
-                      }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="bg-[#F59E0B] text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"
-                    >
-                      <Crown className="w-3 h-3" />
-                      PREMIUM
-                    </motion.div>
-                  ) : (
-                    <div className="bg-white/10 text-white px-3 py-1 rounded-full text-xs">
-                      FREE
-                    </div>
-                  )}
+                  <div className="flex gap-2">
+                    {user?.role === "admin" && (
+                      <Badge className="bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white border-0">
+                        <Shield className="w-3 h-3 mr-1" />
+                        ADMIN
+                      </Badge>
+                    )}
+                    {user?.isPremium ? (
+                      <motion.div
+                        animate={{
+                          boxShadow: [
+                            "0 0 10px rgba(245, 158, 11, 0.5)",
+                            "0 0 20px rgba(245, 158, 11, 0.8)",
+                            "0 0 10px rgba(245, 158, 11, 0.5)",
+                          ],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="bg-[#F59E0B] text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"
+                      >
+                        <Crown className="w-3 h-3" />
+                        PREMIUM
+                      </motion.div>
+                    ) : (
+                      !user?.role && (
+                        <div className="bg-white/10 text-white px-3 py-1 rounded-full text-xs">
+                          FREE
+                        </div>
+                      )
+                    )}
+                  </div>
                 </div>
 
                 <div>

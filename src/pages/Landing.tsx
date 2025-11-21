@@ -3,10 +3,11 @@ import { Video, MessageSquare, Users, Sparkles, ArrowRight, Shield, Zap } from "
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
+import { Badge } from "@/components/ui/badge";
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
@@ -34,6 +35,12 @@ export default function Landing() {
               <span className="text-xl font-bold text-white">Diva Conference</span>
             </div>
             <div className="flex items-center gap-4">
+              {!isLoading && isAuthenticated && user?.role === "admin" && (
+                <Badge className="bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white border-0 hidden sm:flex">
+                  <Shield className="w-3 h-3 mr-1" />
+                  Admin
+                </Badge>
+              )}
               {!isLoading && (
                 <Button
                   onClick={handleGetStarted}
