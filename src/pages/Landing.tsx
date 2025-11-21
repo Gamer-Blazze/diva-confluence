@@ -75,11 +75,7 @@ export default function Landing() {
             </motion.div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight">
-              Welcome To
-              <br />
-              <span className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] bg-clip-text text-transparent">
-                Diva
-              </span>
+              Welcome To <span className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] bg-clip-text text-transparent">Diva</span>
             </h1>
 
             <p className="text-xl text-[#E6EEF8]/80 mb-10 max-w-2xl mx-auto">
