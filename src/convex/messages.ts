@@ -26,6 +26,30 @@ export const sendMessage = mutation({
   },
 });
 
+export const deleteMessage = mutation({
+  args: {
+    messageId: v.id("messages"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+
+    const message = await ctx.db.get(args.messageId);
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    // Allow author or admin to delete
+    if (message.userId !== user._id && user.role !== "admin") {
+      throw new Error("You can only delete your own messages");
+    }
+
+    await ctx.db.delete(args.messageId);
+  },
+});
+
 export const editMessage = mutation({
   args: {
     messageId: v.id("messages"),

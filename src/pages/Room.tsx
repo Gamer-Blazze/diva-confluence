@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2, Edit2, Check, Reply } from "lucide-react";
+import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2, Edit2, Check, Reply, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
@@ -23,6 +23,7 @@ export default function Room() {
   
   const sendMessage = useMutation(api.messages.sendMessage);
   const editMessage = useMutation(api.messages.editMessage);
+  const deleteMessage = useMutation(api.messages.deleteMessage);
   const joinRoom = useMutation(api.rooms.joinRoom);
   const leaveRoom = useMutation(api.rooms.leaveRoom);
   const markAsSeen = useMutation(api.rooms.markAsSeen);
@@ -123,6 +124,19 @@ export default function Room() {
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm("Are you sure you want to delete this message?")) return;
+    
+    try {
+      await deleteMessage({
+        messageId: messageId as Id<"messages">,
+      });
+      toast.success("Message deleted");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete message");
+    }
+  };
+
   const startEditing = (msg: any) => {
     setEditingMessageId(msg._id);
     setEditText(msg.text);
@@ -208,7 +222,9 @@ export default function Room() {
               <AnimatePresence>
                 {messages?.map((msg, index) => {
                   const isOwnMessage = msg.userId === user?._id;
+                  const isAdmin = user?.role === "admin";
                   const canEdit = isOwnMessage && (Date.now() - msg.timestamp < 3 * 60 * 1000);
+                  const canDelete = isOwnMessage || isAdmin;
                   const isEditing = editingMessageId === msg._id;
 
                   return (
@@ -309,7 +325,7 @@ export default function Room() {
                                 )}
                               </p>
                             </motion.div>
-                            <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? "-left-16" : "-right-16"} opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1`}>
+                            <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? "-left-24" : "-right-24"} opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1`}>
                               <Button
                                 size="icon"
                                 variant="ghost"
@@ -326,6 +342,16 @@ export default function Room() {
                                   onClick={() => startEditing(msg)}
                                 >
                                   <Edit2 className="w-3 h-3" />
+                                </Button>
+                              )}
+                              {canDelete && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6 text-gray-400 hover:text-red-500"
+                                  onClick={() => handleDeleteMessage(msg._id)}
+                                >
+                                  <Trash2 className="w-3 h-3" />
                                 </Button>
                               )}
                             </div>
