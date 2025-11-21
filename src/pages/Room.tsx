@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2 } from "lucide-react";
+import { Video, MessageSquare, Users, Send, ArrowLeft, Loader2, X, Minimize2, Edit2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,10 +22,13 @@ export default function Room() {
   const participants = useQuery(api.rooms.getRoomParticipants, roomId ? { roomId: roomId as Id<"rooms"> } : "skip");
   
   const sendMessage = useMutation(api.messages.sendMessage);
+  const editMessage = useMutation(api.messages.editMessage);
   const joinRoom = useMutation(api.rooms.joinRoom);
   const leaveRoom = useMutation(api.rooms.leaveRoom);
   
   const [messageText, setMessageText] = useState("");
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -89,6 +92,27 @@ export default function Room() {
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handleEditMessage = async (messageId: string) => {
+    if (!editText.trim()) return;
+
+    try {
+      await editMessage({
+        messageId: messageId as Id<"messages">,
+        text: editText.trim(),
+      });
+      setEditingMessageId(null);
+      setEditText("");
+      toast.success("Message updated");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to edit message");
+    }
+  };
+
+  const startEditing = (msg: any) => {
+    setEditingMessageId(msg._id);
+    setEditText(msg.text);
   };
 
   const handleTyping = (value: string) => {
@@ -162,6 +186,9 @@ export default function Room() {
               <AnimatePresence>
                 {messages?.map((msg, index) => {
                   const isOwnMessage = msg.userId === user?._id;
+                  const canEdit = isOwnMessage && (Date.now() - msg.timestamp < 3 * 60 * 1000);
+                  const isEditing = editingMessageId === msg._id;
+
                   return (
                     <motion.div
                       key={msg._id}
@@ -175,7 +202,7 @@ export default function Room() {
                         stiffness: 200,
                         damping: 20
                       }}
-                      className={`flex gap-2 ${isOwnMessage ? "flex-row-reverse" : "flex-row"}`}
+                      className={`flex gap-2 ${isOwnMessage ? "flex-row-reverse" : "flex-row"} group`}
                     >
                       {!isOwnMessage && (
                         <Avatar className="w-8 h-8 flex-shrink-0">
@@ -202,16 +229,62 @@ export default function Room() {
                             )}
                           </div>
                         )}
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          className={`rounded-2xl px-4 py-2 ${
-                            isOwnMessage
-                              ? "bg-gradient-to-r from-[#0084FF] to-[#00A3FF] text-white"
-                              : "bg-white text-gray-800 shadow-sm"
-                          }`}
-                        >
-                          <p className="text-sm break-words">{msg.text}</p>
-                        </motion.div>
+                        
+                        {isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              className="h-8 text-sm min-w-[200px]"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleEditMessage(msg._id);
+                                if (e.key === "Escape") setEditingMessageId(null);
+                              }}
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={() => handleEditMessage(msg._id)}
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => setEditingMessageId(null)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="relative group/message">
+                            <motion.div
+                              whileHover={{ scale: 1.02 }}
+                              className={`rounded-2xl px-4 py-2 ${
+                                isOwnMessage
+                                  ? "bg-gradient-to-r from-[#0084FF] to-[#00A3FF] text-white"
+                                  : "bg-white text-gray-800 shadow-sm"
+                              }`}
+                            >
+                              <p className="text-sm break-words">{msg.text}</p>
+                            </motion.div>
+                            {canEdit && (
+                              <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? "-left-8" : "-right-8"} opacity-0 group-hover/message:opacity-100 transition-opacity`}>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6 text-gray-400 hover:text-[#0084FF]"
+                                  onClick={() => startEditing(msg)}
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <span className="text-[10px] text-gray-500 mt-1 px-1">
                           {new Date(msg.timestamp).toLocaleTimeString([], {
                             hour: "2-digit",

@@ -24,6 +24,37 @@ export const sendMessage = mutation({
   },
 });
 
+export const editMessage = mutation({
+  args: {
+    messageId: v.id("messages"),
+    text: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+
+    const message = await ctx.db.get(args.messageId);
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    if (message.userId !== user._id) {
+      throw new Error("You can only edit your own messages");
+    }
+
+    const threeMinutesAgo = Date.now() - 3 * 60 * 1000;
+    if (message.timestamp < threeMinutesAgo) {
+      throw new Error("Message can no longer be edited (3 minute limit)");
+    }
+
+    await ctx.db.patch(args.messageId, {
+      text: args.text,
+    });
+  },
+});
+
 export const getRoomMessages = query({
   args: { roomId: v.id("rooms") },
   handler: async (ctx, args) => {
