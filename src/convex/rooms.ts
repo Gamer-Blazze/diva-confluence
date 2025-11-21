@@ -5,7 +5,7 @@ import { getCurrentUser } from "./users";
 export const createRoom = mutation({
   args: {
     title: v.string(),
-    type: v.union(v.literal("free"), v.literal("premium"), v.literal("unlimited")),
+    type: v.union(v.literal("free"), v.literal("premium"), v.literal("unlimited"), v.literal("personal")),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
@@ -22,7 +22,7 @@ export const createRoom = mutation({
       type: args.type,
       ownerId: user._id,
       isActive: true,
-      maxParticipants: args.type === "unlimited" ? 1000000 : (args.type === "premium" ? 100 : 10),
+      maxParticipants: args.type === "unlimited" ? 1000000 : (args.type === "premium" ? 100 : (args.type === "personal" ? 2 : 10)),
     });
 
     return roomId;

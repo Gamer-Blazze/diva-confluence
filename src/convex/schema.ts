@@ -19,6 +19,7 @@ export const roomTypeValidator = v.union(
   v.literal("free"),
   v.literal("premium"),
   v.literal("unlimited"),
+  v.literal("personal"),
 );
 export type RoomType = Infer<typeof roomTypeValidator>;
 
