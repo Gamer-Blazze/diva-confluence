@@ -187,7 +187,7 @@ export default function Dashboard() {
                       </SelectTrigger>
                       <SelectContent className="bg-[#1E293B] border-white/10">
                         <SelectItem value="free">Free (10 participants)</SelectItem>
-                        <SelectItem value="premium">Premium (50 participants)</SelectItem>
+                        <SelectItem value="premium">Premium (100 participants)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

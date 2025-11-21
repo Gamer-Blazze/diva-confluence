@@ -18,7 +18,7 @@ export const createRoom = mutation({
       type: args.type,
       ownerId: user._id,
       isActive: true,
-      maxParticipants: args.type === "premium" ? 50 : 10,
+      maxParticipants: args.type === "premium" ? 100 : 10,
     });
 
     return roomId;

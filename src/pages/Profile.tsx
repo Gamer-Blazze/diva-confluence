@@ -251,7 +251,7 @@ export default function Profile() {
                 <ul className="space-y-2 text-[#E6EEF8]/90">
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
-                    Host rooms with up to 50 participants
+                    Host rooms with up to 100 participants
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
