@@ -25,7 +25,8 @@ export const emailOtp = Email({
         },
       );
     } catch (error) {
-      throw new Error(JSON.stringify(error));
+      console.error("Failed to send OTP:", error);
+      throw new Error("Failed to send verification code");
     }
   },
 });
