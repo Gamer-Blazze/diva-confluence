@@ -156,7 +156,7 @@ export default function Landing() {
               {
                 icon: Users,
                 title: "Group Rooms",
-                description: "Create rooms for teams with up to 10 participants (Free) or 100 (Premium)",
+                description: "Choose from 5 tiers: Iron (5), Bronze (20), Silver (50), Gold (100), or Diamond (Unlimited)",
                 color: "#F59E0B",
               },
               {

@@ -31,7 +31,7 @@ export default function Dashboard() {
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [roomTitle, setRoomTitle] = useState("");
-  const [roomType, setRoomType] = useState<"free" | "premium" | "unlimited" | "personal">("free");
+  const [roomType, setRoomType] = useState<"iron" | "bronze" | "silver" | "gold" | "diamond">("iron");
   const [isCreating, setIsCreating] = useState(false);
   const [deleteRoomId, setDeleteRoomId] = useState<string | null>(null);
 
@@ -180,17 +180,18 @@ export default function Dashboard() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="type" className="text-white">Room Type</Label>
-                    <Select value={roomType} onValueChange={(value: "free" | "premium" | "unlimited" | "personal") => setRoomType(value)}>
+                    <Label htmlFor="type" className="text-white">Room Plan</Label>
+                    <Select value={roomType} onValueChange={(value: "iron" | "bronze" | "silver" | "gold" | "diamond") => setRoomType(value)}>
                       <SelectTrigger className="bg-[#0F172A] border-white/10 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#1E293B] border-white/10">
-                        <SelectItem value="personal">Personal (2 participants)</SelectItem>
-                        <SelectItem value="free">Free (Up to 10 participants)</SelectItem>
-                        <SelectItem value="premium">Premium (Up to 100 participants)</SelectItem>
+                      <SelectContent className="bg-[#1E293B] border-white/10 text-white">
+                        <SelectItem value="iron">Iron (5 participants) - Basic</SelectItem>
+                        <SelectItem value="bronze">Bronze (20 participants) - Starter</SelectItem>
+                        <SelectItem value="silver">Silver (50 participants) - Pro</SelectItem>
+                        <SelectItem value="gold">Gold (100 participants) - Business</SelectItem>
                         {isAdmin && (
-                          <SelectItem value="unlimited">Unlimited (Admin Only)</SelectItem>
+                          <SelectItem value="diamond">Diamond (Unlimited) - Enterprise</SelectItem>
                         )}
                       </SelectContent>
                     </Select>
@@ -245,26 +246,50 @@ export default function Dashboard() {
                         <CardHeader>
                           <div className="flex justify-between items-start">
                             <CardTitle className="text-white">{room.title}</CardTitle>
-                            <div className="flex gap-2">
-                              {room.type === "premium" && (
-                                <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0">
-                                  Premium
-                                </Badge>
-                              )}
-                              {room.type === "unlimited" && (
-                                <Badge className="bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white border-0">
-                                  Unlimited
-                                </Badge>
-                              )}
-                              {room.type === "personal" && (
-                                <Badge className="bg-gradient-to-r from-[#10B981] to-[#34D399] text-white border-0">
-                                  Personal
-                                </Badge>
-                              )}
-                              <Badge className={room.isActive ? "bg-green-500/20 text-green-400 border-green-500/50" : "bg-red-500/20 text-red-400 border-red-500/50"}>
-                                {room.isActive ? "Active" : "Inactive"}
+                            {room.type === "bronze" && (
+                              <Badge className="bg-gradient-to-r from-[#CD7F32] to-[#A0522D] text-white border-0">
+                                Bronze
                               </Badge>
-                            </div>
+                            )}
+                            {room.type === "silver" && (
+                              <Badge className="bg-gradient-to-r from-[#C0C0C0] to-[#E0E0E0] text-gray-800 border-0">
+                                Silver
+                              </Badge>
+                            )}
+                            {room.type === "gold" && (
+                              <Badge className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-white border-0">
+                                Gold
+                              </Badge>
+                            )}
+                            {room.type === "diamond" && (
+                              <Badge className="bg-gradient-to-r from-[#B9F2FF] to-[#00FFFF] text-[#004444] border-0">
+                                Diamond
+                              </Badge>
+                            )}
+                            {room.type === "iron" && (
+                              <Badge className="bg-gradient-to-r from-[#434343] to-[#000000] text-white border-0">
+                                Iron
+                              </Badge>
+                            )}
+                            {/* Legacy Badges Support */}
+                            {(room.type as string) === "premium" && (
+                              <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0">
+                                Premium
+                              </Badge>
+                            )}
+                            {(room.type as string) === "unlimited" && (
+                              <Badge className="bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white border-0">
+                                Unlimited
+                              </Badge>
+                            )}
+                            {(room.type as string) === "personal" && (
+                              <Badge className="bg-gradient-to-r from-[#10B981] to-[#34D399] text-white border-0">
+                                Personal
+                              </Badge>
+                            )}
+                            <Badge className={room.isActive ? "bg-green-500/20 text-green-400 border-green-500/50" : "bg-red-500/20 text-red-400 border-red-500/50"}>
+                              {room.isActive ? "Active" : "Inactive"}
+                            </Badge>
                           </div>
                           <CardDescription className="text-[#E6EEF8]/70">
                             by {room.owner?.displayName || room.owner?.name || "Unknown"}
@@ -337,17 +362,43 @@ export default function Dashboard() {
                       <CardHeader>
                         <div className="flex justify-between items-start">
                           <CardTitle className="text-white">{room.title}</CardTitle>
-                          {room.type === "premium" && (
+                          {room.type === "bronze" && (
+                            <Badge className="bg-gradient-to-r from-[#CD7F32] to-[#A0522D] text-white border-0">
+                              Bronze
+                            </Badge>
+                          )}
+                          {room.type === "silver" && (
+                            <Badge className="bg-gradient-to-r from-[#C0C0C0] to-[#E0E0E0] text-gray-800 border-0">
+                              Silver
+                            </Badge>
+                          )}
+                          {room.type === "gold" && (
+                            <Badge className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-white border-0">
+                              Gold
+                            </Badge>
+                          )}
+                          {room.type === "diamond" && (
+                            <Badge className="bg-gradient-to-r from-[#B9F2FF] to-[#00FFFF] text-[#004444] border-0">
+                              Diamond
+                            </Badge>
+                          )}
+                          {room.type === "iron" && (
+                            <Badge className="bg-gradient-to-r from-[#434343] to-[#000000] text-white border-0">
+                              Iron
+                            </Badge>
+                          )}
+                          {/* Legacy Badges Support */}
+                          {(room.type as string) === "premium" && (
                             <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#F59E0B] text-white border-0">
                               Premium
                             </Badge>
                           )}
-                          {room.type === "unlimited" && (
+                          {(room.type as string) === "unlimited" && (
                             <Badge className="bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white border-0">
                               Unlimited
                             </Badge>
                           )}
-                          {room.type === "personal" && (
+                          {(room.type as string) === "personal" && (
                             <Badge className="bg-gradient-to-r from-[#10B981] to-[#34D399] text-white border-0">
                               Personal
                             </Badge>

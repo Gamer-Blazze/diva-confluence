@@ -16,10 +16,11 @@ export const roleValidator = v.union(
 export type Role = Infer<typeof roleValidator>;
 
 export const roomTypeValidator = v.union(
-  v.literal("free"),
-  v.literal("premium"),
-  v.literal("unlimited"),
-  v.literal("personal"),
+  v.literal("iron"),
+  v.literal("bronze"),
+  v.literal("silver"),
+  v.literal("gold"),
+  v.literal("diamond"),
 );
 export type RoomType = Infer<typeof roomTypeValidator>;
 
