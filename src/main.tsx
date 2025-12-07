@@ -4,6 +4,7 @@ import { InstrumentationProvider } from "@/instrumentation.tsx";
 import AuthPage from "@/pages/Auth.tsx";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
+import { inject } from "@vercel/analytics";
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
@@ -14,6 +15,9 @@ import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Room from "./pages/Room.tsx";
 import "./types/global.d.ts";
+
+// Initialize Vercel Web Analytics
+inject();
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
